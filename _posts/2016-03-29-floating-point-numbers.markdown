@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Practical and theoretical numbers"
+title:  "1. Practical and theoretical numbers"
 date:   2016-03-29 16:30:18 +0200
 categories: numerical-methods
 ---
@@ -16,8 +16,9 @@ either {% m %}\sqrt{2}{% em %} or {% m %}\pi{% em %}. We will call such numbers
 *theoretical*.
 
 In contrast, *practical* numbers are those we can actually use for
-calculations{% sidenote "one" "Hamming in his book use word *real* numbers,
-but that may create confusion with numbers from set $$\\mathbb{R}$$"%}.
+calculations{% sidenote "one" "R.W. Hamming in \"Numerical methods for
+scientists and engineers\" uses word *real* numbers,
+but this may create confusion with numbers from set $$\\mathbb{R}$$"%}.
 There are numerous ways how we can define these practical numbers: they can be
 just usual decimals or binaries, or, perhaps, something more esoteric
 as having numbers such as
