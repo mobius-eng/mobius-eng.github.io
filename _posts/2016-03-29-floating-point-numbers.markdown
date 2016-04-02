@@ -14,6 +14,7 @@ of them. Furthermore, let {% m %}k = \pi / \sqrt{2}{% em %}; we cannot write
 neither fractional representation of $$k$$, nor it could be represented via
 either {% m %}\sqrt{2}{% em %} or {% m %}\pi{% em %}. We will call such numbers
 *theoretical*.
+<!--more-->
 
 In contrast, *practical* numbers are those we can actually use for
 calculations{% sidenote "one" "R.W. Hamming in \"Numerical methods for
@@ -149,27 +150,40 @@ keep our discussion simple we will not allow even these subnormal numbers.
 
 ## Arithmetic on floating-point numbers
 
-Let's consider the addition of $$0.360$$ and $$12.5$$:
+{% newthought "A general approach" %} to floating-point arithmetic operations is the same one would use for scientific notation with the addition of keeping mantissa length and exponent bound. For example, in scientific notation addition
+
+{% math %}
+2.01\times10^{4} + 3.4\times10^{2}
+{% endmath %}
+
+will require equating exponents{% sidenote "sn-exp-sub" "To any value, easiest --- to the lowest." %}, multiplying mantissas by $$10^n$$ where $$n$$ is the change of exponent for each number, and finally adding mantissas and keeping the exponent parts{% sidenote "sn-dist" "This is the use of distribution law: $$ab + ac = a(b+c)$$ where $$a$$ is exponent part of the number." %}:
+
+{% math %}
+201.0\times10^{2} + 3.4\times10^{2} = 204.4\times10^{2} = 2.044\times10^{4}.
+{% endmath %}
+
+Multiplication is simpler: mantissas are multiplied, exponents are added:
+
+{% math %}
+(2.01\times10^4)\times(3.4\times10^{2}) = 6.834\times10^{6}.
+{% endmath %}
+
+Now let's look at strategies of keeping mantissas and exponents bound. Let's look at the addition of $$0.360$$ and $$12.5$$:
 
 {% math %}
 (+,360, 0) + (+,125,2)
 {% endmath %}
 
-To add them we need to equate their exponents
-first (by extending one of the mantissas):
+First, their exponents are equalised:
 
 {% math %}
-(+,360,0) + (+,125,2) = (+,00360,2) + (+,125,2)
-= (+,12860, 2)
+\begin{align*}
+(+,360,0) + (+,125,2) & = (+,00360,2) + (+,125,2)\\
+& = (+,128\cdot60, 2)
+\end{align*}
 {% endmath %}
 
-Now we have the excess of digits in mantissa: last two digits need to be
-dropped. There are two possible ways of dropping: either just truncate
-them, or round them, in which case the last significant digit might
-increase if the following digit is $$\geq 5$$. Simple truncation,
-although faster, leads to a higher rate of precision loss. Considering
-our low starting precision, we will use rounding. Thus the final
-result becomes:
+Now we have the excess of digits in mantissa (denoted by $$\cdot$$): last two digits need to be dropped. There are two possible ways of dropping: either just truncate them, or round them, in which case the last significant digit might increase if the following digit is $$\geq 5$${% sidenote "sn-add-round" "Notice that we have temporally extended mantissa's width for this operation. Alternatively, we could have brought exponents to the largest number, rounding the mantissa of the smallest number *before* the addition. While this would produce the same result for addition, this strategy will have some detrimental properties for subtraction and thus avoided." %}. Simple truncation, although faster, leads to a higher rate of precision loss. Considering our low starting precision, we will use rounding. Thus the final result becomes:
 
 {% math %}
 (+,129, 2) = 12.9
@@ -184,7 +198,7 @@ example:
 
 Here mantissa became too large (notice, not just too long due to too high
 precision required, but actually too large): now it represents number 1.100,
-i.e. there is one *before* the point. This overflow needs to be consumed by the
+i.e. there is 1 *before* the point. This overflow needs to be consumed by the
 exponent:
 
 {% math %}
@@ -198,56 +212,135 @@ the largest possible number in which case their result will become infinite:
 (+,700,9) + (+,600,9) = (+,999,9) = +\infty
 {% endmath %}
 
-Multiplication is performed similarly, but exponents are added and the
-mantissas are multiplied{% sidenote "sn-man-mul" "Notice we need to take care of
+Multiplication of floating-point numbers resembles the multiplication in scientific notation with one complication: we need to take care of
 the fact that mantissas are fractional parts. For example in multiplication
-$$0.2\\times0.3=0.06$$ mantissa terms will multiply as $$200\\times300=60000$$.
+$$3.0\times20.0=60.0$$ mantissa terms will multiply as $$200\times300=60000$$.
 This result needs to be adjusted by dividing it by $$10^{3}$$, i.e. 10 raised to
-the power of mantissa width."%}:
+the power of mantissa's width.
 
 {% math %}
 \begin{align*}
-4.0\times 50.0 = (+,400,10 1) \times (+,500,2) & = (+,200000, 1+2-3)\\
-& = (+, 200, 3) = 200.0
+3.0\times 20.0 = (+,300,1) \times (+,200,2) & = (+,060\cdot000, 1+2)\\
+& = (+, 060, 3) = (+, 600,2) = 60.0
 \end{align*}
 {% endmath %}
 
-We allow in our calculations to produce a technical mantissa overflow. However,
-strictly speaking, the overflow is not possible as we multiply two numbers less
-than one. Mantissa underflow, however, is possible in principle:
+This example shows *mantissa underflow* that is happened during multiplication: the result was a subnormal number $$(+, 060, 3)$$ that needed to be normalised by decreasing exponent and shifting the mantissa to the left. At this point it is important to keep one{% sidenote "sn-mul" "In fact, two digit: the first digit to take place and the second digit to be used for rounding" %} extra digit from the multiplication result to populate the mantissa's last digit. To illustrate this point, consider multiplication:
 
 {% math %}
-3.0\times 20.0 = (+,300,1) \times (+,200,2) = (+, 060,3) = (+, 600, 2) = 60.0.
+(+,301,1) \times (+,202,2) = (+,060\cdot802,3)=(+,608,2)
 {% endmath %}
 
-Once again, the exponent is used to promote the first non-zero digit in mantissa
-to the first position. Furthermore, the underflow of
-multiplication of two very small numbers can lead to the zero result:
+Subtraction is very similar to addition. For example,
 
 {% math %}
-(+,200,-8)\times(+,500,-9) = (+,000,0)
+\begin{align*}
+(+, 283, 1) - (+, 532,-1) & = (+,283, 1) - (+,00532,1)\\
+ & = (+, 277\cdot68,1) = (+, 278, 1)
+\end{align*}
 {% endmath %}
 
-Subtraction is very similar to addition, but it contains a subtle
-danger. Consider the following expression:
+Division is best viewed as a multiplication by the reciprocal of the denominator:
 
 {% math %}
-1.0 - 0.999 = (+,100,1) - (+,999,0) = (+,0001,1) = (+,100,-2) = 0.001
+(+, 283, 1) / (+, 532, -1) = (+,283,1) \times \text{recip}(+,532,-1)
+{% endmath %}
+
+The reciprocal is found as: (a) the exponent is negated and increased by 1, and (b) a rounded division of 1.0 by mantissa. Part (a) is mostly intuitive: reciprocal does imply the negation of exponent. The increase by 1 is due to the fact that numbers are represented with leading zero before point. Consider number $$1.0=(+,100,1)$$ its reciprocal should be itself. But negation of 1 will produce $$-1$$, that needs will be partially consumed by the increase and partially by mantissa overflow (see further below). Part (b) needs to be modified to operate on integer representation of mantissa. First, by multiplying both 1.0 and mantissa by 1000, the operation of 1.0 dividing by mantissa-as-a-fraction is equivalent to the division of 1000 by the mantissa-as-an-integer. However, since mantissa ranges from 100 to 999, the division will produce the result in the range of 1 to 10. To avoid dealing with non-trivial underflows, we can, instead, divide the number which is 100 times larger than 1000 by the mantissa. The range of the results will be from 100 to 1000 with the overflowed results occurring  only for mantissa 100 (and coincidently, it will provide extra 1 to exponent for reciprocal of $$1.0=(+,100,1)$$). Thus,
+
+{% math %}
+\text{recip}(+, 532, -1) = (+, 188, 2)
+{% endmath %}
+
+and division is reduced to multiplication:
+
+{% math %}
+\begin{align*}
+(+,283,1)/(+,532,-1) = (+,283,1) \times (+,188,2) & = (+,53\cdot204, 3)\\
+& = (+, 532, 2).
+\end{align*}
+{% endmath %}
+
+## Machine epsilon or dangers of floating-point arithmetic
+
+{% newthought "Let's look at some properties" %} of floating-point arithmetic in  bit more detail. All of these properties arise from limited precision defined by the fixed length of mantissa. In floating-point addition, for example, if a very large number is added to a very small number, the effect of the small number on the large number is zero:
+
+{% math %}
+(+,100,9) + (+,100,-9) = (+,100\cdot0\ldots1, 9) = (+,100,9)
+{% endmath %}
+
+This effect is obviously relative: what matters the most is the difference between the exponents. To have some point of reference, let's fix the largest number at 1.0. The largest positive number that won't make a difference in the
+floating-point system with mantissa's width 3 is:
+
+{% math %}
+(+,100,1) + (+,499,-2) = (+,100\cdot499,1)=(+,100,1)
+{% endmath %}
+
+The smallest positive number that when added to 1.0 produces the result different from one is called *machine precision*. In this system it is the number $$\boldsymbol{u}=(+,500,-2)=0.005$$.
+
+*Negative machine precision* is defined as the smallest number that upon subtraction from 1.0 will produce the result smaller than 1.0. Surprisingly, it is about ten times smaller than machine precision{% sidenote "sn-neg-eps" "This calculation depends on the intermediate result to have extended mantissa. If subtrahend here is rounded to fit the precision width of the minuend prior subtraction, negative machine precision will be larger, $$(+,500,-2)$$." %}:
+
+{% math %}
+(+,100,1)-(+,501,-3)=(+,099\cdot9499,1) = (+,999,0)
+{% endmath %}
+
+Now let's look at a different scenario: two close numbers are subtracted, for example, $$1.0$$ and $$0.999$$:
+
+{% math %}
+(+,100,1) - (+,999,0) = (+,000\cdot1,1) = (+,100,-2)
 {% endmath %}
 
 Notice what has happened: we subtracted two numbers with the precision
 of up to three digits, but the result has a precision of only one
-digit. This is called *loss of significance*.
+digit{% sidenote "sn-sub-loss" "We filled essentially non-existent extra two digits of significance with zeros. However, there is no guarantee that in real computing system that will happen, the result just may have been $$(+,107,-2)$$" %}. This is called *loss of significance*.
 
-Floating-point numbers division is similar to multiplication, except
-that exponents are subtracted and mantissas are divided. The caveat
-with division is when a number is divided by a very small number
-(similar to multiplication by a very large number): since the
-magnitude increases significantly, the roundoff error is blown up as
-well. The worst case scenario is when the significance is lost due to
-subtraction and then this number is divided by something very
-small. Consider, for example, approximating the derivative by finite
-difference:
+In multiplication both mantissa underflow and exponent underflow can result in zero product while multiplying two non-zero numbers:
+
+{% math %}
+\begin{align*}
+(+,200,-4) \times (+,300,-5) &= (+,060\cdot000,-9)\\
+&\{\text{mantissa underflow}\} = (+,600,-10)\\
+&\{\text{exponent underflow}\} = (+, 000, 0)
+\end{align*}
+{% endmath %}
+
+Multiplication by a very large number or, equivalently, division by a very small number while does not present the problem purely arithmetically, the danger is uncovered once the result is analysed.{% marginfigure "mfig-reciprocal" "assets/img/reciprocal.png" "The uncertainty interval increases as the reciprocal of a small number is taken." %} Consider, for example, reciprocal of a number $$(+, 532, -4)$$:
+
+{% math %}
+\text{recip}(5.32\times10^{-5})=\text{recip}(+,532, -4) = (+,188,5) = 18800
+{% endmath %}
+
+Now, let's imagine this number was a result of a measurement and there is an uncertainty about its last digit: $$(5.32\pm0.01)\times10^{-5}$$. Also, let's assume that this particular measurement was unusually small, normally it would fall into the range of $$0.1-1.0$$. For normal range of the measurement the uncertainty of reciprocal (with three digits accuracy) is not exceeding $$0.2$$. For this measurement, however, it becomes larger than $$70$$. While $$70$$ is still small relative to the result 18800, the result itself is blown up, causing the error to grow with it *relative to other results*.
+
+As a consequence of above mentioned properties, floating-point arithmetic does not strictly obey theoretical laws, such as distribution and associativity. For example, in the equation:
+
+{% math %}
+a(b+c) = ab +ac
+{% endmath %}
+
+if all numbers are sufficiently small, both multiplications of right-hand-side may result in zero, causing the sum to become zero. Yet, if $$b$$ and $$c$$ are still big enough for their sum not to produce zero as it is multiplied by $$a$$, the left-hand-side will be non-zero. Or more concrete:
+
+{% math %}
+\begin{align*}
+(+,200,-4) \times\left((+,300,-5) + (+,300,-5)\right) & = (+,200,-4)\times (+,600,-5)\\
+(+, 120, -9)
+\end{align*}
+
+Yet,
+
+{% math %}
+(+,200,-4)\times(+,300,-5) + (+,200,-4)\times(+,300,-5) = (+, 0, 0)
+{% endmath %}
+
+as was shown before. Similarly, addition is not associative:
+
+{% math %}
+(1.0 + \varepsilon) + \varepsilon \neq 1.0 + (\varepsilon + \varepsilon),
+{% endmath %}
+
+where $$\varepsilon$$ is a number in the range $$1/2\boldsymbol{u}<\varepsilon<\boldsymbol{u}$$. The left hand side is equal to one since each addend is below machine precision. In contrast, the value larger than machine precision is added to one on the right hand side.
+
+A practical implication of round off error effect can be seen in approximating the derivative by finite difference:
 
 {% math %}
 D[f](x) = \frac{df}{dx}(x) = \frac{f(x+h) - f(x-h)}{2h} +O(h^2)
