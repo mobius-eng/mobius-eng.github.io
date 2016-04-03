@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "1. Practical and theoretical numbers"
+title:  "Practical and theoretical numbers"
 date:   2016-03-29 16:30:18 +0200
 categories: numerical-methods
 ---
@@ -14,7 +14,6 @@ of them. Furthermore, let {% m %}k = \pi / \sqrt{2}{% em %}; we cannot write
 neither fractional representation of $$k$$, nor it could be represented via
 either {% m %}\sqrt{2}{% em %} or {% m %}\pi{% em %}. We will call such numbers
 *theoretical*.
-<!--more-->
 
 In contrast, *practical* numbers are those we can actually use for
 calculations{% sidenote "one" "R.W. Hamming in \"Numerical methods for
@@ -83,7 +82,7 @@ following representation:
 {% math %}
 +0.6022\times10^{24}.
 {% endmath %}
-
+<!--more-->
 Here 0.6022 is *mantissa* (also referred as significand) and 23 is *exponent*.
 For illustration purposes, following Hamming, we will limit mantissa to three
 digits after the point and exponent to be in the range $$-9$$ to
@@ -240,12 +239,33 @@ Subtraction is very similar to addition. For example,
 \end{align*}
 {% endmath %}
 
+<a name="subtraction-strategies"></a>There are, however, two strategies of producing the result: the mantissas of the operands can be rounded to fit the precision of the result or the intermediate result has an extended mantissa to fit the precision of both mantissas and the resulting mantissa is rounded to fit the mantissa's width. For addition both  these strategies will provide the same result. For subtraction, however, the results can be different. For example, consider subtraction of
+
+{% math %}
+(+, 100, 3) - (+,499,0)
+{% endmath %}
+
+The first strategy will result in:
+
+{% math %}
+(+, 100, 3) - (+,000\cdot499,3) = (+,100,3) - (+,000,3) = (+,100,3)
+{% endmath %}
+
+I.e. no change was made to the original number as the subtrahend was too small. The second strategy, however will show the difference:
+
+{% math %}
+(+,100,3) - (+,000\cdot499,3) = (+, 099\cdot501, 3) =(+,995,2)
+{% endmath %}
+
+As the former helps to maintain higher precision, it will be adopted.
+
 Division is best viewed as a multiplication by the reciprocal of the denominator:
 
 {% math %}
 (+, 283, 1) / (+, 532, -1) = (+,283,1) \times \text{recip}(+,532,-1)
 {% endmath %}
 
+<a name="reciprocal"></a>
 The reciprocal is found as: (a) the exponent is negated and increased by 1, and (b) a rounded division of 1.0 by mantissa. Part (a) is mostly intuitive: reciprocal does imply the negation of exponent. The increase by 1 is due to the fact that numbers are represented with leading zero before point. Consider number $$1.0=(+,100,1)$$ its reciprocal should be itself. But negation of 1 will produce $$-1$$, that needs will be partially consumed by the increase and partially by mantissa overflow (see further below). Part (b) needs to be modified to operate on integer representation of mantissa. First, by multiplying both 1.0 and mantissa by 1000, the operation of 1.0 dividing by mantissa-as-a-fraction is equivalent to the division of 1000 by the mantissa-as-an-integer. However, since mantissa ranges from 100 to 999, the division will produce the result in the range of 1 to 10. To avoid dealing with non-trivial underflows, we can, instead, divide the number which is 100 times larger than 1000 by the mantissa. The range of the results will be from 100 to 1000 with the overflowed results occurring  only for mantissa 100 (and coincidently, it will provide extra 1 to exponent for reciprocal of $$1.0=(+,100,1)$$). Thus,
 
 {% math %}
@@ -325,6 +345,7 @@ if all numbers are sufficiently small, both multiplications of right-hand-side m
 (+,200,-4) \times\left((+,300,-5) + (+,300,-5)\right) & = (+,200,-4)\times (+,600,-5)\\
 (+, 120, -9)
 \end{align*}
+{% endmath %}
 
 Yet,
 
