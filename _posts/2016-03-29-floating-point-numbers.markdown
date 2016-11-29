@@ -16,9 +16,7 @@ either {% m %}\sqrt{2}{% em %} or {% m %}\pi{% em %}. We will call such numbers
 *theoretical*.
 
 In contrast, *practical* numbers are those we can actually use for
-calculations{% sidenote "one" "R.W. Hamming in \"Numerical methods for
-scientists and engineers\" uses word *real* numbers,
-but this may create confusion with numbers from set $$\\mathbb{R}$$"%}.
+calculations{% sidenote "one" "R.W. Hamming in \"Numerical methods for scientists and engineers\" uses word *real* numbers, but this may create confusion with numbers from set $$\\mathbb{R}$$" %}.
 There are numerous ways how we can define these practical numbers: they can be
 just usual decimals or binaries, or, perhaps, something more esoteric
 as having numbers such as
@@ -37,50 +35,28 @@ Secondly, the number of digits to represent the number will be limited.
 
 ## Intergers and fixed-point numbers
 
-{% newthought "Without going into too deep details"%} about *integers*, we will
-essentially equate a theoretical integer and a practical
-integer. While in some systems (for example, C or Fortran) integers
-might be capped to some value, most modern systems (Lisp, Python,
-Smalltalk, F#, Haskell, etc.) offer arbitrary large integers (still
-capped by the size of the available memory, but large enough for us
-not to worry): 12356, -4567, 572168632689567.
+{% newthought "Without going into too deep details" %} about *integers*, we will essentially equate a theoretical integer and a practical integer. While in some systems (for example, C or Fortran) integers might be capped to some value, most modern systems (Lisp, Python, Smalltalk, F#, Haskell, etc.) offer arbitrary large integers (still capped by the size of the available memory, but large enough for us not to worry): 12356, -4567, 572168632689567.
 
 *Fixed-point* numbers are essentially the same as integers, but with the
 decimal point put in the middle (usually, considering last four digits
-to be fractional part of a number): 1235.600, -45.6700,
-57216863268.9567. The point does not move, thus the smallest positive
-number would be 0.001{% sidenote "mn-electron" "This is way too large, for
-example, to represent the mass of an electron, $$9.11\\times10^{-31}$$ kg"%}.
+to be fractional part of a number). So, 1235.600, -45.6700 or
+57216863268.9567 are really 1235600, -456700 and 572168632689567. The point does not move, thus the smallest positive
+number would be 0.001{% sidenote "mn-electron" "This is way too large, for example, to represent the mass of an electron, $$9.11\\times10^{-31}$$ kg" %}.
 As integers, these numbers can be arbitrary large. However, the representation
-of something as large as the mass of Earth{% sidenote "sn-earth"
-"$$5.97\\times10^{24}$$ kg"%} would lead to prohibitively slow arithmetic
-operations. One area where fixed-point fractional numbers are successfully used
-is the finance: the number representation guarantees that no money can be
-made out of thin air, neither the money can disappear there (when
-people do make such things, they have to use different methods).
+of something as large as the mass of Earth{% sidenote "sn-earth" "$$5.97\\times10^{24}$$ kg" %} would lead to prohibitively slow arithmetic operations. One area where fixed-point fractional numbers are successfully used is the finance: the number representation guarantees that no money can be
+made out of thin air, neither the money can disappear there{% sidenote "money" "When people do make such things, they have to use different methods" %}.
+
 
 ## Floating-point numbers
 
-{% newthought "Engineers and scientists"%} have to rely on *floating-point*
-numbers for their calculations. First, floating-point numbers cover a large range
-of values{% sidenote "sn-float-range" "On modern personal computers they range
-from about $$10^{-300}$$ to $$10^{300}$$ for both positive and negative
-numbers"%} enabling to use them from quantum mechanics to statistical physics
-and cosmology. Secondly, the operations on these numbers are relatively fast:
-while they are slower than on (capped) integers, they are much faster compared
-to arbitrary large integers or fixed-point numbers. As a trade off,
-floating-pont numbers offer only limited precision. For example, number
-{% m %}\pi{% em %} (which is irrational and hence has infinitely long tail
-of digits without cycles) would be approximated by
-{% m %}3.141592653589793{% em %} and the tail of $$238462643383279\ldots$$ is
-dropped.
+{% newthought "Engineers and scientists" %} have to rely on *floating-point* numbers for their calculations. First, floating-point numbers cover a large range of values{% sidenote "sn-float-range" "On modern personal computers they range from about $$10^{-300}$$ to $$10^{300}$$ for both positive and negative numbers" %} enabling to use them from quantum mechanics to statistical physics and cosmology. Secondly, the operations on these numbers are relatively fast: while they are slower than on (capped) integers, they are much faster compared to arbitrary large integers or fixed-point numbers. As a trade off, floating-point numbers offer only limited precision. For example, number {% m %}\pi{% em %} (which is irrational and hence has infinitely long tail of digits without cycles) would be approximated by {% m %}3.141592653589793{% em %} and the tail of $$238462643383279\ldots$$ is dropped.
 
 Representation of floating-points numbers is close to a scientific notation.
 For example, Avogadro's number $$N_A = 6.022\times10^{23}$$ will have the
 following representation:
 
 {% math %}
-+0.6022\times10^{24}.
++0.6022\times10^{24}
 {% endmath %}
 <!--more-->
 Here 0.6022 is *mantissa* (also referred as significand) and 23 is *exponent*.
@@ -91,61 +67,36 @@ we can operate directly on fractional part of number. Also notice that the same
 number can have a different representation:
 
 {% math %}
-+0.06022\times10^{25}.
++0.06022\times10^{25}
 {% endmath %}
 
-Numbers for which the fractional part of mantissa starts with zero are called
-*subnormal* numbers. We will follow the convention of most computer systems by
-not allowing subnormal numbers. Thus, fractional part of mantissa must begin
-with a non-zero digit.
+Numbers for which the fractional part of mantissa starts with zero are called *subnormal* numbers. Subnormal numbers are only allowed at extremely limited cases. For example, in case of numbers limited to three digits in mantissa and $$-9$$ to $$9$$ exponent, the smallest positive number is subnormal
 
-There is no need to store leading zero or base 10 of the
-representation. But we do need to make a provision for the sign of the
-number{% sidenote "sn-exp-sing" "Strictly speaking we need to take care of the
-sign of the exponent as well. However, actual way of storing the exponent avoids
-this problem, but we will omit this detail"%}. For example, the approximation of
-number $$\pi$$ can written as:
+{% math %} +0.001\times10^{-9} {% endmath %}
+
+Apart from such cases where subnormal is necessary, mantissa mast start from a non-zero digit.
+
+There is no need to store leading zero or base 10 of the representation.
+But we do need to make a provision for the sign of the
+number{% sidenote "sn-exp-sing" "Strictly speaking we need to take care of the sign of the exponent as well. However, actual way of storing the exponent avoids this problem, but we will omit this detail" %}. For example, the approximation of number $$\pi$$ can written as:
 
 {% math %}
-0.3141592653589793 \times 10^1 = (+,3141592653589793,1)
+0.3141592653589793\dots \times 10^1 \approx (+,314,1)
 {% endmath %}
 
-To keep the notation simple and not allow ourselves to be distracted by
-unimportant details we will limit mantissa to contain only three digits and
-exponent to fall in range $$-9$$ to $$9$$.
-
 If a number requires exponent to be higher (or lower) the limit, we encounter
-*exponent overflow* (*underflow*). In computer systems we have two options: we
-either signal an error (*raise an exception* using the terms of most modern
-programming languages) and let the user decide what to do or we can silently
-assign an *infinity* value (or zero in case of underflow). While the latter
-might not be the best option from system design point of view, most of the
-systems implement it due to its low computational cost and the fact that it
-produces sensible (in practical terms) results. Negative and positive
-infinities, will be $$\pm\infty = (\pm, 999, 9)$$. Thus, the largest (by
-magnitude) proper number is $$(+,998,9)$$.
-
-To represent number zero we will require that both mantissa and exponent of the
-number are zero: $$(\pm,000,0)$$. Notice, we can have positive and negative
-zeros. We will require that they are arithmetically equivalent.
+*exponent overflow* (*underflow*). In computer systems we have two options: we either signal an error (*raise an exception* using the terms of most modern programming languages) and let the user decide what to do or we can silently assign an *infinity* value (or zero in case of underflow). While the latter might not be the best option from system design point of view, most of the systems implement it due to its low computational cost and the fact that it produces sensible (in practical terms) results. Negative and positive infinities, will be $$\pm\infty = (\pm, 999, 9)$$.{% sidenote "largest-fp" "The largest (by magnitude) proper number is $$(+,998,9)=998,000,000$$" %} To represent number zero we will require that both mantissa and exponent of the number are zero: $$(\pm,000,0)$$. Notice, we can have positive and negative zeros. We will require that they are arithmetically equivalent. It is also common to introduce *not a number* (or NaN) constant. NaN usually arises when the operation on infinities is used, or when zero is divided by zero. Since it doesn't make sense to have zero mantissa with non-zero exponent, any number like that, e.g. $$(+,000,3), will be NaN.
 
 Before looking into operations on floating-point numbers it's worth
-understanding some of their properties. First, there exists the
-smallest positive floating-point number: $$(+,100, -9)=0.1\times10^{-9}$$.
-Between $$0.1\times10^{-9}$$ (including) and
-$$0.1\times10^{-8}$$ (excluding) there are exactly 900 numbers (with
-mantissas ranging from 100 to 999). These numbers are uniformly distributed with
-the interval $$10^{-12}$$. However, numbers in interval $$0.1\times10^{-8}$$
-(including) and $$0.1\times^{-7}$$ (excluding) are uniformly distributed with
-the interval 10 times larger, $$10^{-11}$$. Continuing this process, one
-concludes that 899 numbers in the interval $$0.1\times^{9}$$ (including) to
-$$0.999\times{9}$$ (excluding) are distributed with the interval $$10^{6}$$.
+understanding some of their properties.
+First, there exists the smallest positive floating-point proper number: $$(+,100, -9)=0.1\times10^{-9}$$.
+The smallest positive number, as pointed above, is improper: $$(+,001,-9)=0.1\times10^{-11}$$.
+Notice, it only has one digit of accuracy.
+Between $$0.1\times10^{-9}$$ (including) and $$0.1\times10^{-8}$$ (excluding) there are exactly 900 numbers (with mantissas ranging from 100 to 999).
+These numbers are uniformly distributed with the interval $$10^{-12}$$.
+However, numbers in interval $$0.1\times10^{-8}$$ (including) and $$0.1\times^{-7}$$ (excluding) are uniformly distributed with the interval 10 times larger, $$10^{-11}$$.
+Continuing this process, one concludes that 898 numbers in the interval $$0.1\times^{9}$$ (including) to $$0.998\times{9}$$ (excluding){% sidenote "inf" "Remember, $$(+,999,9)$$ is infinity" %} are distributed with the interval $$10^{6}$$.
 However, floating-point numbers as whole are not uniformly distributed.
-
-There is one case in which subnormal numbers can be sensibly allowed: consider
-the following number close to zero, $$(+,001, -9)$$. It is hundred times smaller
-than a proper smallest number. However, it only has one digit of precision. To
-keep our discussion simple we will not allow even these subnormal numbers.
 
 ## Arithmetic on floating-point numbers
 
@@ -158,7 +109,7 @@ keep our discussion simple we will not allow even these subnormal numbers.
 will require equating exponents{% sidenote "sn-exp-sub" "To any value, easiest --- to the lowest." %}, multiplying mantissas by $$10^n$$ where $$n$$ is the change of exponent for each number, and finally adding mantissas and keeping the exponent parts{% sidenote "sn-dist" "This is the use of distribution law: $$ab + ac = a(b+c)$$ where $$a$$ is exponent part of the number." %}:
 
 {% math %}
-201.0\times10^{2} + 3.4\times10^{2} = 204.4\times10^{2} = 2.044\times10^{4}.
+201.0\times10^{2} + 3.4\times10^{2} = 204.4\times10^{2} = 2.044\times10^{4}
 {% endmath %}
 
 Multiplication is simpler: mantissas are multiplied, exponents are added:
@@ -173,7 +124,7 @@ Now let's look at strategies of keeping mantissas and exponents bound. Let's loo
 (+,360, 0) + (+,125,2)
 {% endmath %}
 
-First, their exponents are equalised:
+First, their exponents are equalized:
 
 {% math %}
 \begin{align*}
@@ -311,8 +262,7 @@ Now let's look at a different scenario: two close numbers are subtracted, for ex
 {% endmath %}
 
 Notice what has happened: we subtracted two numbers with the precision
-of up to three digits, but the result has a precision of only one
-digit{% sidenote "sn-sub-loss" "We filled essentially non-existent extra two digits of significance with zeros. However, there is no guarantee that in real computing system that will happen, the result just may have been $$(+,107,-2)$$" %}. This is called *loss of significance*.
+of up to three digits, but the result has a precision of only one digit{% sidenote "sn-sub-loss" "We filled essentially non-existent extra two digits of significance with zeros. However, there is no guarantee that in real computing system that will happen, the result just may have been $$(+,107,-2)$$" %}. This is called *loss of significance*.
 
 In multiplication both mantissa underflow and exponent underflow can result in zero product while multiplying two non-zero numbers:
 
@@ -382,8 +332,7 @@ measures the overall error of derivative approximation at $$x=0$$. First, if
 $$h$$ is taken as $$10^{-n}$$ for $$n=0,1,2,\ldots$$ the
 corresponding values of $$\Delta$$ are:
 
-{% marginnote "tab-der-1" "The effect of decreasing the step of approximation on
-overall error for the modeled floating-point numbers with mantissa width = 6"%}
+{% marginnote "tab-der-1" "The effect of decreasing the step of approximation on overall error for the modeled floating-point numbers with mantissa width = 6" %}
 
 | $$n$$                       | $$\Delta$$                 |
 |----------------------------:+---------------------------:|
@@ -402,8 +351,7 @@ $$\exp{(10^{-4})}$$ and $$\exp{(-10^{-4})}$$ evaluate to $$1.0001$$ and $$0.9999
 $$0.00020003319$$. This extra garbage causes slightly faster deterioration of
 the resulting error.
 
-{% marginnote "tab-der-2" "The effect of the decreasing step of approximation on
-overall error for `SINGLE-FLOAT` Common Lisp numbers"%}
+{% marginnote "tab-der-2" "The effect of the decreasing step of approximation on overall error for `SINGLE-FLOAT` Common Lisp numbers" %}
 
 | $$n$$                       | $$\Delta$$                  |
 |----------------------------:+----------------------------:|

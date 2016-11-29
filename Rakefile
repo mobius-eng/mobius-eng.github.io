@@ -153,7 +153,7 @@ end
 # rake build
 desc "Build the site"
 task :build do
-  execute("jekyll build")
+  execute("bundle exec jekyll build")
 end
 
 # rake watch
@@ -163,12 +163,12 @@ desc "Serve and watch the site (with post limit or drafts)"
 task :watch, :option do |t, args|
   option = args[:option]
   if option.nil? or option.empty?
-    execute("jekyll serve --watch")
+    execute("bundle exec jekyll serve --watch")
   else
     if option == "drafts"
-      execute("jekyll serve --watch --drafts")
+      execute("bundle exec jekyll serve --watch --drafts")
     else
-      execute("jekyll serve --watch --limit_posts #{option}")
+      execute("bundle exec jekyll serve --watch --limit_posts #{option}")
     end
   end
 end
