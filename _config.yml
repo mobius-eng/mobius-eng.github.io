@@ -19,6 +19,7 @@
 # in the templates via {{ site.myvariable }}.
 
 title: Maths & Programming Geekery
+tagline: How will this show?
 # email: your-email@example.com
 description: >- # this means to ignore newlines until "baseurl:"
   Geek here.
@@ -27,8 +28,10 @@ url: "" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: mobius_eng
 github_username:  mobius-eng
 
+excerpt_separator: <!--more-->
+
 # Build settings
-theme: minima
+# theme: cayman
 plugins:
   - jekyll-feed
 
