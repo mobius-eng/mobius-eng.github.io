@@ -2,7 +2,7 @@
 layout: post
 title: Setting up VSCode for Fortran
 date:  2020-03-20 21:30:00 +0200
-categories: fortran vscode
+categories: fortran
 ---
 
 ### Fortran IDEs
